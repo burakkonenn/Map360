@@ -1,0 +1,114 @@
+﻿@using Application.DTOs.User;
+@model List<UserListDto>
+
+@{
+    ViewData["Title"] = "Map360 | Kullanıcılar";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+
+            $('#example').DataTable(
+                {
+                    "dom": '<"dt-buttons"Bf><"clear">lirtp',
+                    "paging": true,
+                    "autoWidth": true,
+                    "buttons": [
+                        'colvis',
+                        'copyHtml5',
+                        'csvHtml5',
+                        'excelHtml5',
+                        'pdfHtml5',
+                        'print'
+                    ]
+                }
+            );
+        });
+
+        $(function () {
+            $("tbody").on("click", ".delete-user", function () {
+                let btn = $(this);
+                let id = btn.data("id");
+                Swal.fire({
+                    title: 'Kullanıcı bilgilerini silmek istediğinize emin misiniz?',
+                    icon: 'error',
+                    buttons: true,
+                    showCancelButton: true,
+                    dangerMode: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: "/User/Delete/" + id,
+                            success: function () {
+                                btn.parent().parent().remove();
+                                Swal.fire(
+                                    'Kullanıcı bilgileri başarılı bir şekilde silindi.',
+                                )
+                            },
+                        });
+                    }
+                    else {
+
+                    }
+                    return false;
+                });
+
+            });
+        });
+
+    </script>
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between">
+                <h2 class="header-text">Kullanıcı Bilgieri</h2>
+                <a asp-controller="User" asp-action="Create" class="create-button">Kullanıcı Ekle</a>
+            </div>
+
+            <table id="example" class="table display table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Ad</th>
+                        <th>Soyad</th>
+                        <th>Email</th>
+                        <th>Şirket Adı</th>
+                        <th>Görev</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+
+                            <td>@user.Id</td>
+                            <td>@user.FirstName</td>
+                            <td>@user.LastName</td>
+                            <td>@user.Email</td>
+                            <td>@user.CompanyName</td>
+                            <td>@user.TaskName</td>
+
+                            <td class="table-buttons">
+
+                                <a asp-controller="User" asp-action="Details" asp-route-id="@user.Id">
+                                    <img src="~/svg/search-right-1507-svgrepo-com.svg" />
+                                </a>
+                                <a asp-controller="User" asp-action="Edit" asp-route-id="@user.Id">
+                                    <img src="~/svg/edit-2-svgrepo-com.svg" />
+                                </a>
+                                <a data-id="@user.Id" class="delete-user">
+                                    <img src="~/svg/delete-svgrepo-com.svg" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+﻿@using Application.DTOs.User;
+@model UserDetailDto
+
+<div class="container">
+    <div class="row user-detail-row">
+        <h2>@Model.CompanyName Kullanıcı Bilgisi</h2>
+        <div class="col-md-12">
+            <div class="card">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <label>Kullanıcı Adı:</label>
+                        <h4>@Model.FirstName @Model.LastName</h4>
+                    </li>
+                    <li class="list-group-item">
+                        <label>Kullanıcı E-posta Adres:</label>
+                        <h4>@Model.Email</h4>
+                    </li>
+                    <li class="list-group-item">
+                        <label>Kullanıcı Şirket Bilgisi:</label>
+                        <h4>@Model.CompanyName</h4>
+                    </li>
+                    <li class="list-group-item">
+                        <label>Kullanıcı Şirket Görevi:</label>
+                        <h4>@Model.TaskName</h4>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

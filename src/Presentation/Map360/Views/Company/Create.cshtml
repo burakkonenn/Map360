@@ -1,0 +1,87 @@
+﻿@using Application.DTOs.Company;
+@model CompanyCreateDto
+
+@{
+    ViewData["Title"] = "Map360 | Yeni Şirket Ekle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+
+    <h2>Şirket Kayıt</h2>
+    <div class="row">
+        <div class="col-md-12">
+            <form id="formSaveCompany">
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Şirket Adı</label>
+                    <input asp-for="CompanyName" type="email" class="form-control" aria-describedby="emailHelp">
+                    <span asp-validation-for="CompanyName"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Şirket Telefonu</label>
+                    <input asp-for="CompanyPhone" type="tel" class="form-control" aria-describedby="emailHelp">
+                    <span asp-validation-for="CompanyPhone"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Şirket Adresi</label>
+                    <input asp-for="@Model.CompanyAddress" type="text" class="form-control" aria-describedby="emailHelp">
+                    <span asp-validation-for="@Model.CompanyAddress"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Şirket Vergi Numarası</label>
+                    <input asp-for="CompanyTaxNumber" type="text" class="form-control" aria-describedby="emailHelp">
+                    <span asp-validation-for="CompanyName"></span>
+                </div>
+                <button type="button" id="saveCompany" class="btn btn-primary">Kaydet</button>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        $("#saveCompany").click(function () {
+            var url = "/company/create";
+            var method = "POST";
+            var data = { companyTaxNumber: $("#CompanyTaxNumber").val(), companyAddress: $("#CompanyAddress").val(), companyPhone: $("#CompanyPhone").val(), companyName: $("#CompanyName").val() };
+            $.ajax({
+                type: method,
+                url: url,
+                data: data,
+                dataType: "json",
+                success: function (response) {
+                    if (response.isSuccess == true) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Bilgilendirme',
+                            text: response.message,
+                            footer: ''
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location = "/companies";
+                            }
+                        });
+
+                        $("#formSaveCompany")[0].reset();
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata',
+                            text: response.message,
+                            footer: ''
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: "Beklenmedik bir hata oluştu.",
+                        footer: ''
+                    });
+                }
+            });
+        });
+    </script>
+}
+

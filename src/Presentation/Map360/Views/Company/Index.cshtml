@@ -1,0 +1,113 @@
+﻿@using Application.DTOs.Company;
+@model List<CompanyListDto>
+
+@{
+    ViewData["Title"] = "Map360 | Şirketler";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+
+            $('#example').DataTable(
+                {
+                    "dom": '<"dt-buttons"Bf><"clear">lirtp',
+                    "paging": true,
+                    "autoWidth": true,
+                    "buttons": [
+                        'colvis',
+                        'copyHtml5',
+                        'csvHtml5',
+                        'excelHtml5',
+                        'pdfHtml5',
+                        'print'
+                    ]
+                }
+            );
+        });
+
+        $(function () {
+            $("tbody").on("click", ".delete-company", function () {
+                let btn = $(this);
+                let id = btn.data("id");
+                Swal.fire({
+                    title: 'Şirket bilgilerini silmek istediğinize emin misiniz?',
+                    icon: 'error',
+                    buttons: true,
+                    showCancelButton: true,
+                    dangerMode: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: "/Company/Delete/" + id,
+                            success: function () {
+                                btn.parent().parent().remove();
+                                Swal.fire(
+                                    'Şirket bilgileri başarılı bir şekilde silindi.',
+                                )
+                            },
+                        });
+                    }
+                    else {
+                    }
+                    return false;
+                });
+
+            });
+        });
+
+    </script>
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between">
+                <h2 class="header-text">Şirket Bilgieri</h2>
+                <a asp-controller="Company" asp-action="Create" class="create-button">Şirket Ekle</a>
+            </div>
+            <table id="example" class="table display table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Şirket Adı</th>
+                        <th>Şirket Telefonu</th>
+                        <th>Şirket Adresi</th>
+                        <th>Şirket Vergi Numarası</th>
+                        <th>Eklenme Tarihi</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var company in Model)
+                    {
+                        <tr>
+
+                            <td>@company.Id</td>
+                            <td>
+                                <span class="table-span">@company.CompanyName</span>
+                            </td>
+                            <td>@company.CompanyPhone</td>
+                            <td>@company.CompanyAddress</td>
+                            <td>@company.CompanyTaxNumber</td>
+                            <td>@company.CreatedDate</td>
+                            <td class="table-buttons">
+
+                                <a asp-controller="Company" asp-action="Details" asp-route-id="@company.Id">
+                                    <img src="~/svg/search-right-1507-svgrepo-com.svg" />
+                                </a>
+                                <a asp-controller="Company" asp-action="Edit" asp-route-id="@company.Id">
+                                    <img src="~/svg/edit-2-svgrepo-com.svg" />
+                                </a>
+                                <a data-id="@company.Id" class="delete-company">
+                                    <img src="~/svg/delete-svgrepo-com.svg" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

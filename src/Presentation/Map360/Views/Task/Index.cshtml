@@ -1,0 +1,277 @@
+﻿@model TaskCreateDto
+@using Application.DTOs.CompanyTasks;
+@{
+    ViewData["Title"] = "Map360 | Görevler";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between">
+                <h2 class="header-text">Görev Bilgieri</h2>
+                <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="create-button">Görev Ekle</button>
+            </div>
+
+            <form id="formSaveTask">
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Map360</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label>Görev Adı</label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name"></span>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                                <button type="button" id="saveTask" class="btn btn-primary">Kaydet</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <form id="formEditTask">
+                <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <input type="hidden" id="hiddenTaskId" />
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Map360</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <label>Görev Adı</label>
+                                <input required class="form-control edit-task" />
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                                <button type="button" id="editTask" class="btn btn-primary">Kaydet</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
+            <table id="example" class="table display table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Görev Adı</th>
+                        <th>Eklenme Tarihi</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.Task != null)
+                    {
+                        @foreach (var task in ViewBag.Task.Data)
+                        {
+                            <tr>
+                                <td >@task.Id</td>
+                                <td>
+                                    <span data-id="@task.Id" class="table-span">@task.Name</span>
+                                </td>
+                                <td>@task.CreatedDate</td>
+
+                                <td class="table-buttons">
+                                    <a asp-controller="Task" asp-action="Details" asp-route-id="@task.Id">
+                                        <img src="~/svg/search-right-1507-svgrepo-com.svg" />
+                                    </a>
+                                    <a data-id="@task.Id" data-bs-toggle="modal" data-bs-target="#editModal" id="editTaskId">
+                                        <img src="~/svg/edit-2-svgrepo-com.svg" />
+                                    </a>
+                                    <a data-id="@task.Id" class="delete-task">
+                                        <img src="~/svg/delete-svgrepo-com.svg" />
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts{
+    <script>
+
+        $(document).ready(function () {
+
+            $('#example').DataTable(
+                {
+                    "dom": '<"dt-buttons"Bf><"clear">lirtp',
+                    "paging": true,
+                    "autoWidth": true,
+                    "buttons": [
+                        'colvis',
+                        'copyHtml5',
+                        'csvHtml5',
+                        'excelHtml5',
+                        'pdfHtml5',
+                        'print'
+                    ]
+                }
+            );
+        });
+
+        $(function () {
+            $("tbody").on("click", ".delete-task", function () {
+                let btn = $(this);
+                let id = btn.data("id");
+                Swal.fire({
+                    title: 'Şirket bilgilerini silmek istediğinize emin misiniz?',
+                    icon: 'error',
+                    buttons: true,
+                    showCancelButton: true,
+                    dangerMode: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: "POST",
+                            url: "/Task/Delete/" + id,
+                            success: function () {
+                                btn.parent().parent().remove();
+                                Swal.fire(
+                                    'Şirket bilgileri başarılı bir şekilde silindi.',
+                                )
+                            },
+                        });
+                    }
+                    else {
+                    }
+                    return false;
+                });
+
+            });
+        });
+
+        $("#saveTask").click(function () {
+            var url = "/task/create";
+            var method = "POST";
+            var data = { Name: $("#Name").val() };
+            $.ajax({
+                type: method,
+                url: url,
+                data: data,
+                dataType: "json",
+                success: function (response) {
+
+                    if (response.isSuccess == true) {
+                        var rows = "<tr>"
+                            + "<td class='yourTableTh'>" + response.data.id + "</td>"
+                            + "<td class='yourTableTh'>" + response.data.name + "</td>"
+                            + "<td class='yourTableTh'>" + response.data.createdDate + "</td>"
+                            + "</tr>";
+                        $('table tbody').append(rows);
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Bilgilendirme',
+                            text: response.message,
+                            footer: ''
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $("#formSaveTask")[0].reset();
+                            }
+                        });
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata',
+                            text: response.message,
+                            footer: ''
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: "Beklenmedik bir hata oluştu.",
+                        footer: ''
+                    });
+                }
+            });
+        });
+
+        $("#editTask").click(function () {
+            var url = "/task/edit";
+            var method = "POST";
+            var data = { name: $(".edit-task").val(), id: $("#hiddenTaskId").val() };
+            $.ajax({
+                type: method,
+                url: url,
+                data: data,
+                dataType: "json",
+                success: function (response) {
+                    //console.log(response.data.name);
+                    if (response.isSuccess == true) {
+
+                        var a = $('table').find(".table-span[data-id='" + response.data.id + "']").parent().text(response.data.name).css("background-color", "#d0d1e2");
+
+                        console.log(a);
+                        //var rows = "<tr>"
+                        //    + "<td class='yourTableTh'>" + response.data.name + "</td>"
+                        //    + "</tr>";
+
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Bilgilendirme',
+                            text: response.message,
+                            footer: ''
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                $("#formEditTask")[0].reset();
+                            }
+                        });
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata',
+                            text: response.message,
+                            footer: ''
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: "Beklenmedik bir hata oluştu.",
+                        footer: ''
+                    });
+                }
+            });
+        });
+
+        $(function () {
+            $("tbody").on("click", "#editTaskId", function () {
+
+                let btn = $(this);
+                let id = btn.data("id");
+
+                $.ajax({
+                    type: "GET",
+                    url: "/Task/Edit/" + id,
+                    success: function (response) {
+                        $(".edit-task").val(response.data.name)
+                        $("#hiddenTaskId").val(response.data.id)
+                        var btnRow = $(this).closest("td").find(response.data.id);
+                        console.log(btnRow);
+                    },
+                });
+            })
+        })
+    </script>
+}

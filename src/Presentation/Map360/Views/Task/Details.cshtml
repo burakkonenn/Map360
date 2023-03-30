@@ -1,0 +1,68 @@
+﻿@using Application.DTOs.UserTask;
+@model UserTaskDetailsWithUsers
+
+@{
+    ViewData["Title"] = "Map360 | Görev Detayları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#example').DataTable(
+            {
+                "dom": '<"dt-buttons"Bf><"clear">lirtp',
+                "paging": true,
+                "autoWidth": true,
+                "buttons": [
+                    'colvis',
+                    'copyHtml5',
+                    'csvHtml5',
+                    'excelHtml5',
+                    'pdfHtml5',
+                    'print'
+                ]
+            }
+        );
+    });
+</script>
+
+<div class="container role-container">
+    <h2>"@Model.TaskName" rolündeki kullanıcı bilgileri</h2>
+    <table id="example" class="table table-striped table table-hover" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Ad Soyad</th>
+                <th>E-posta</th>
+                <th>Şirketi</th>
+                <th>Görevi</th>
+                <th>Eklenme Tarihi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Users)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Firstname @item.LastName</td>
+                    <td>@item.Email</td>
+                    <td>@item.CompanyName</td>
+                    <td>@item.TaskName</td>
+                    <td>@item.CreatedDate</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>

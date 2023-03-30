@@ -1,0 +1,251 @@
+﻿@using Application.DTOs.Company;
+@model CompanyDetails
+
+@{
+    ViewData["Title"] = "Map360 | Şirket Detayları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="https://code.jquery.com/jquery-3.6.4.js" integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        $('table').DataTable(
+            {
+                "dom": '<"dt-buttons"Bf><"clear">lirtp',
+                "paging": true,
+                "autoWidth": true,
+                "buttons": [
+                    'colvis',
+                    'copyHtml5',
+                    'csvHtml5',
+                    'excelHtml5',
+                    'pdfHtml5',
+                    'print'
+                ]
+            }
+        );
+    });
+
+
+
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="all-tabs">
+                <div class="tab-header">
+                    <h1 class="text-header mb-2">Şirket Detayları</h1>
+                    <div class="card">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <label>Şirket Adı:</label>
+                                <h4>@Model.CompanyName</h4>
+                            </li>
+                            <li class="list-group-item">
+                                <label>Şirket Adresi:</label>
+                                <h4>@Model.CompanyAddress</h4>
+                            </li>
+                            <li class="list-group-item">
+                                <label>Şirket Vergi Numarası:</label>
+                                <h4>@Model.CompanyTaxNumber</h4>
+                            </li>
+                            <li class="list-group-item">
+                                <label>Şirket İletişim Numarası:</label>
+                                <h4>@Model.CompanyPhone</h4>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2 class="text-header">Kullanıcı Bilgileri</h2>
+                <table id="example" class="table display table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Ad Soyad</th>
+                            <th>E-posta</th>
+                            <th>Şirket Bilgisi</th>
+                            <th>Görevi</th>
+                            <th>Eklenme Tarihi</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.UserDetails)
+                        {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>
+                                <span class="table-span">@user.Firstname @user.LastName</span>
+                            </td>
+                            <td>@user.Email</td>
+                            <td>@user.CompanyName</td>
+                            <td>@user.TaskName</td>
+                            <td>@user.CreatedDate</td>
+                            <td class="table-buttons">
+                                <a asp-controller="User" asp-action="Details" asp-route-id="@user.Id">
+                                    <img src="~/svg/search-right-1507-svgrepo-com.svg" />
+                                </a>
+                                <a asp-controller="User" asp-action="Edit" asp-route-id="@user.Id">
+                                    <img src="~/svg/edit-2-svgrepo-com.svg" />
+                                </a>
+                                <a data-id="@user.Id" class="user-delete">
+                                    <img src="~/svg/delete-svgrepo-com.svg" />
+                                </a>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+
+
+    $(document).ready(function () {
+        $("#basic-form").validate();
+    });
+
+
+    $(function () {
+        $("tbody").on("click", ".edit-task", function () {
+
+
+            let btn = $(this);
+            let id = btn.data("id");
+
+            $.ajax({
+                type: "GET",
+                url: "/UserTask/AjaxEditGet/" + id,
+                success: function (data) {
+                    var parseData = JSON.parse(data);
+                    $("#ajx-task").val(parseData.Name);
+                    $(".taskId").val(parseData.Id);
+                },
+            });
+
+        });
+    });
+
+
+    $(function () {
+        $("tbody").on("click", ".delete-task", function () {
+
+
+            let btn = $(this);
+            let id = btn.data("id");
+            console.log(id);
+
+            Swal.fire({
+                title: 'Görev bilgilerini silmek istediğinize emin misiniz?',
+                icon: 'error',
+                buttons: true,
+                showCancelButton: true,
+                dangerMode: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/UserTask/Delete/" + id,
+                        success: function () {
+                            btn.parent().parent().remove();
+                            Swal.fire(
+                                'Şirket bilgileri başarılı bir şekilde silindi.',
+                                'success'
+                            )
+                        },
+                    });
+                }
+                else {
+                    Swal.fire({
+                        text: 'İşlem iptal edildi...',
+                        icon: 'info'
+                    });
+                }
+                return false;
+            });
+
+        });
+    });
+
+    $(function () {
+        $("tbody").on("click", ".user-delete", function () {
+
+
+            let btn = $(this);
+            let id = btn.data("id");
+
+            Swal.fire({
+                title: 'Kullanıcı bilgilerini silmek istediğinize emin misiniz?',
+                icon: 'error',
+                buttons: true,
+                showCancelButton: true,
+                dangerMode: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/User/Delete/" + id,
+                        success: function () {
+                            btn.parent().parent().remove();
+                            Swal.fire(
+                                'Şirket bilgileri başarılı bir şekilde silindi.',
+                                'success'
+                            )
+                        },
+                    });
+                }
+                else {
+                    Swal.fire({
+                        text: 'İşlem iptal edildi...',
+                        icon: 'info'
+                    });
+                }
+                return false;
+            });
+
+        });
+    });
+
+    let tabSwitchers = document.querySelectorAll('[target-wrapper]')
+    tabSwitchers.forEach(item => {
+        item.addEventListener('click', (e) => {
+            let currentWrapperId = item.getAttribute('target-wrapper')
+            let currentWrapperTargetId = item.getAttribute('target-tab')
+
+            let currentWrapper = document.querySelector(`#${currentWrapperId}`)
+            let currentWrappersTarget = document.querySelector(`#${currentWrapperTargetId}`)
+
+            let allCurrentTabItem = document.querySelectorAll(`[target-wrapper='${currentWrapperId}']`)
+            let allCurrentWrappersTarget = document.querySelectorAll(`#${currentWrapperId} .tab-content`)
+
+            if (currentWrappersTarget) {
+                if (!currentWrappersTarget.classList.contains('active')) {
+                    allCurrentWrappersTarget.forEach(tabItem => {
+                        tabItem.classList.remove('active')
+                    })
+                    allCurrentTabItem.forEach(item => {
+                        item.classList.remove('active')
+                    })
+                    item.classList.add('active')
+                    currentWrappersTarget.classList.add('active')
+                }
+            }
+        })
+    })
+</script>

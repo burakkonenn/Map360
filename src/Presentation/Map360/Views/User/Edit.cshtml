@@ -1,0 +1,126 @@
+﻿@using Application.DTOs.User;
+@model UserUpdateDto
+
+@{
+    ViewData["Title"] = "Map360 | Kullanıcı Düzenle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row user-row">
+        <div class="col-md-12">
+            <form id="formEditUser">
+                <input type="hidden" asp-for="@Model.Id" />
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Kullanıcı Adı</label>
+                    <input asp-for="@Model.FirstName" type="email" class="form-control">
+                    <span asp-validation-for="@Model.FirstName"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Kullanıcı Soyadı</label>
+                    <input asp-for="@Model.LastName" type="tel" class="form-control">
+                    <span asp-validation-for="@Model.LastName"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Kullanıcı E-posta Adresi</label>
+                    <input asp-for="@Model.Email" type="text" class="form-control">
+                    <span asp-validation-for="@Model.Email"></span>
+                </div>
+                <div class="mb-3">
+
+                    <select class="form-select" asp-items="@ViewBag.companyList" asp-for="@Model.CompanyId">
+                        @if (ViewBag.Companies != null)
+                        {
+                            foreach (var item in ViewBag.Companies.Data)
+                            {
+                                if (item.Value == Model.CompanyId)
+                                {
+                                    <option selected value="@item.Value">@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+
+                            }
+
+                        }
+                    </select>
+
+
+
+
+                </div>
+
+                <div class="mb-3">
+
+                    <select class="form-select" asp-for="@Model.TaskId">
+                        @if (ViewBag.Tasks != null)
+                        {
+                            foreach (var item in ViewBag.Tasks.Data)
+                            {
+                                if (item.Value == Model.TaskId)
+                                {
+                                    <option selected value="@item.Value">@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+
+                            }
+
+                        }
+                    </select>
+                </div>
+                <button type="button" id="editUser" onclick="return functionPostForm()" class="btn btn-primary">Kaydet</button>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script>
+        $("#editUser").click(function () {
+            var url = "/user/edit";
+            var method = "PUT";
+            var data = { id: $("#Id").val(), companyId: $("#CompanyId").val(), taskId: $("#TaskId").val(), email: $("#Email").val(), firstName: $("#FirstName").val(), lastName: $("#LastName").val() };
+            $.ajax({
+                type: method,
+                url: url,
+                data: data,
+                dataType: "json",
+                success: function (response) {
+                    if (response.isSuccess == true) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Bilgilendirme',
+                            text: response.message,
+                            footer: ''
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location = "/users";
+                            }
+                        });
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata',
+                            text: response.message,
+                            footer: ''
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: "Beklenmedik bir hata oluştu.",
+                        footer: ''
+                    });
+                }
+            });
+        });
+    </script>
+}
+

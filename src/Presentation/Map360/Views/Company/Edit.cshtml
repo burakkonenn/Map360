@@ -1,0 +1,93 @@
+﻿@using Application.DTOs.Company;
+@model CompanyUpdateDto
+
+@{
+    ViewData["Title"] = "Map360 | Şirket Güncelle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <form id="formEditCompany">
+                <input type="hidden" asp-for="CompanyId"  value="@Model.CompanyId" />
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Şirket Adı</label>
+                    <input asp-for="@Model.CompanyName" type="text" class="form-control"  aria-describedby="emailHelp">
+                    <span asp-validation-for="@Model.CompanyName" class="validation"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Şirket Telefonu</label>
+                    <input asp-for="@Model.CompanyPhone" type="tel" class="form-control" aria-describedby="emailHelp">
+                    <span asp-validation-for="@Model.CompanyPhone" class="validation"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Şirket Adresi</label>
+                    <input asp-for="@Model.CompanyAddress" type="text" class="form-control" aria-describedby="emailHelp">
+                    <span asp-validation-for="@Model.CompanyAddress" class="validation"></span>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Şirket Vergi Numarası</label>
+                    <input asp-for="@Model.CompanyTaxNumber" type="text" class="form-control"  aria-describedby="emailHelp">
+                    <span asp-validation-for="@Model.CompanyName" class="validation"></span>
+                </div>
+                <button type="button" id="editCompany" class="btn btn-primary">Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+@section Scripts{
+    <script>
+        $("#editCompany").click(function () {
+            var url = "/company/edit";
+            var method = "PUT";
+            var data = { companyTaxNumber: $("#CompanyTaxNumber").val(), companyAddress: $("#CompanyAddress").val(), companyPhone: $("#CompanyPhone").val(), companyName: $("#CompanyName").val(),
+            
+                companyId: $("#CompanyId").val()
+            
+            };
+            $.ajax({
+                type: method,
+                url: url,
+                data: data,
+                dataType: "json",
+                success: function (response) {
+                     if (response.isSuccess == true) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Bilgilendirme',
+                            text: response.message,
+                            footer: ''
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location = "/companies";
+                            }
+                        });
+
+                        $("#formEditCompany")[0].reset();
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata',
+                            text: response.message,
+                            footer: ''
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: "Beklenmedik bir hata oluştu.",
+                        footer: ''
+                    });
+                }
+            });
+        });
+    </script>
+}
+
+
+
